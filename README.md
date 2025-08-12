@@ -247,8 +247,9 @@ Straai uses Supabase Auth for secure authentication with the following features:
 
 ### Production Build
 ```bash
-npm run build
-npm run start
+# Monorepo root deploy
+npm run build --workspace=server
+npm run start --workspace=server
 ```
 
 ### Environment Variables for Production
@@ -256,8 +257,8 @@ Make sure to set all environment variables from `env.example` in your production
 
 ### Database Migrations
 ```bash
-# In production, run migrations instead of db:push
-npm run db:migrate
+# In production (Railway), deploy migrations
+npm run db:migrate:deploy --workspace=server
 ```
 
 ## 🧪 Testing
@@ -363,6 +364,3 @@ This project is licensed under the MIT License.
 - Check existing [GitHub Issues](../../issues)
 - Create a new issue with detailed description
 - Include error messages and environment details
-#   S t r a a i 
- 
- 

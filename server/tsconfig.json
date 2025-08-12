@@ -24,8 +24,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@straai/shared": ["../shared/src/index.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],
