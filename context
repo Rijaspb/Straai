@@ -1,0 +1,33 @@
+[MASTER PROMPT]
+Build Straai MVP using the stack:
+- Frontend: React + Vite + TS + Tailwind + shadcn/ui
+- Auth: Supabase (email/password + Google OAuth)
+- Backend: Node + Express + TypeScript + Prisma + Postgres
+- AI: OpenAI GPT-5 for conversational analytics & reports
+- Payments: Stripe (14-day free trial, no card at signup)
+- Email: Resend (schedule weekly reports)
+- Integrations: Shopify OAuth, Klaviyo OAuth
+
+Deliver:
+1) repo scaffold and CI
+2) prisma schema + initial migration
+3) signup/login in home hero (no separate pages), google oauth
+4) Stripe trial flow (trial without card), webhook handlers
+5) Shopify + Klaviyo connect flows and basic sync of orders + email metrics
+6) AnalyticsEngine + one preprogrammed question implemented end to end (data calc + GPT-5 prompt + UI)
+7) Weekly report generator (PDF) + Resend scheduled email at Monday 08:00 user timezone
+8) Chat UI and quick questions buttons (5 preprogrammed)
+9) Settings: integrations, billing, GDPR export/delete
+10) Footer with Privacy/Terms/Cookies links
+Provide clear README with env vars, local dev steps, and next steps for GA4/meta integration.
+
+
+Starter
+$29
+per month
+14-day free trial
+Shopify + Klaviyo
+Unlimited chat conversations
+Weekly email analytics and insights
+Chat history
+Start Free Trial

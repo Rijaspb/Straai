@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  passwordHash  String?
+  supabaseId    String?   @unique
+  emailVerified Boolean   @default(false)
+  timezone      String    @default("UTC")
+  country       String?
+  companyName   String?
+  businessContext String?  @db.Text
+  inTrial       Boolean   @default(false)
+  stripeCustomerId String? @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  instantInsightsSentAt DateTime?
+
+  // Relations
+  stores              Store[]
+  klaviyoIntegrations KlaviyoIntegration[]
+  integrations        Integration[]
+  subscriptions       Subscription[]
+  reports             Report[]
+  conversations       Conversation[]
+  newsletterSubscriptions NewsletterSubscription[]
+  dataExportRequests  DataExportRequest[]
+  quickWins           QuickWin[]
+
+  @@index([email])
+  @@index([supabaseId])
+  @@map("users")
+}
+
+model Store {
+  id                  String    @id @default(uuid()) @db.Uuid
+  userId              String    @db.Uuid
+  shopifyShopDomain   String    @unique
+  shopifyAccessToken  String
+  installedAt         DateTime  @default(now())
+  lastSyncAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports Report[]
+  quickWins QuickWin[]
+
+  @@index([userId])
+  @@index([shopifyShopDomain])
+  @@map("stores")
+}
+
+model Integration {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  provider      String    // 'shopify', 'klaviyo', 'ga4', 'stripe', 'meta'
+  accountId     String    // Provider-specific account identifier
+  accessToken   String    // Encrypted access token
+  refreshToken  String?   // Encrypted refresh token
+  expiresAt     DateTime?
+  scopes        String[]  // OAuth scopes granted
+  metadata      Json?     // Provider-specific data (shop domain, etc.)
+  status        String    @default("connected") // 'connected', 'expired', 'revoked', 'error'
+  lastSyncAt    DateTime?
+  syncFrequency Int       @default(3600) // Sync frequency in seconds
+  webhookUrl    String?   // Webhook endpoint for this integration
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  syncLogs SyncLog[]
+
+  @@unique([userId, provider, accountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([status])
+  @@index([lastSyncAt])
+  @@map("integrations")
+}
+
+model SyncLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  integrationId String    @db.Uuid
+  dataType      String    // 'orders', 'products', 'customers', 'campaigns', etc.
+  status        String    // 'success', 'error', 'partial'
+  recordsCount  Int       @default(0)
+  errorMessage  String?
+  metadata      Json?     // Sync-specific metadata
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+  @@index([dataType])
+  @@index([status])
+  @@index([startedAt])
+  @@map("sync_logs")
+}
+
+// Legacy model - keeping for backward compatibility
+model KlaviyoIntegration {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  accountId    String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, accountId])
+  @@index([userId])
+  @@index([accountId])
+  @@map("klaviyo_integrations")
+}
+
+model Subscription {
+  id                   String    @id @default(uuid()) @db.Uuid
+  userId               String    @db.Uuid
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String    @unique
+  status               String // 'active', 'trialing', 'past_due', 'canceled', 'unpaid'
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Report {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  storeId     String    @db.Uuid
+  weekOf      DateTime  @db.Date
+  pdfPath     String?
+  summary     String?
+  generatedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storeId, weekOf])
+  @@index([userId])
+  @@index([storeId])
+  @@index([weekOf])
+  @@map("reports")
+}
+
+model QuickWin {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  storeId   String?  @db.Uuid
+  date      DateTime @db.Date
+  type      String   // 'top_products' | 'top_flow'
+  title     String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store? @relation(fields: [storeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, type, date])
+  @@map("quick_wins")
+}
+
+model Conversation {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  messages  Json      @db.JsonB
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("conversations")
+}
+
+// OAuth state management for connector framework
+model OAuthState {
+  id        String   @id @default(uuid()) @db.Uuid
+  state     String   @unique
+  data      String   // JSON string containing OAuth flow data
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([state])
+  @@index([expiresAt])
+  @@map("oauth_states")
+}
+
+model NewsletterSubscription {
+  id         String   @id @default(uuid()) @db.Uuid
+  email      String   @unique
+  userId     String?  @db.Uuid
+  source     String?
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@map("newsletter_subscriptions")
+}
+
+model DataExportRequest {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  processedAt  DateTime?
+  errorMessage String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("data_export_requests")
+}
