@@ -14,8 +14,9 @@ export const errorHandler = (
 ) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode
 
+  const isProd = process.env.NODE_ENV === 'production'
   res.status(statusCode).json({
-    message: error.message,
-    stack: process.env.NODE_ENV === 'production' ? '🥞' : error.stack,
+    message: isProd ? 'Internal Server Error' : error.message,
+    stack: isProd ? '🥞' : error.stack,
   })
 }

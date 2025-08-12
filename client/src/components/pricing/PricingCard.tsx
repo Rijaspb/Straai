@@ -9,7 +9,7 @@ interface PricingCardProps {
   onSelect: () => void
 }
 
-export function PricingCard({ title, price, description, features, onSelect }: PricingCardProps) {
+export function PricingCard({ title, price, features, onSelect }: PricingCardProps) {
   return (
     <div className="relative">
       {/* Popular badge positioned outside the card */}
@@ -34,7 +34,7 @@ export function PricingCard({ title, price, description, features, onSelect }: P
         <div className="text-sm text-green-600 font-medium mt-1">14-day free trial</div>
         
         <ul className="mt-6 space-y-4 text-sm">
-          {features.map((f, index) => (
+          {features.map((f) => (
             <li key={f} className="flex items-start gap-3 group-hover:text-gray-900 transition-colors">
               <div className="mt-0.5 w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 flex items-center justify-center flex-shrink-0 shadow-lg">
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">

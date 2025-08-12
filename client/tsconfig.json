@@ -23,7 +23,8 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@straai/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src"],

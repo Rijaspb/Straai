@@ -30,12 +30,32 @@ const PORT = process.env.PORT || 8000
 
 // Middleware
 app.use(helmet())
-app.use(cors())
+
+// Restrictive CORS: allow only the production frontend in production; allow localhost in dev
+const clientUrlFromEnv = process.env.CLIENT_URL || 'http://localhost:3000'
+const allowedOrigins = new Set(
+  process.env.NODE_ENV === 'production'
+    ? [clientUrlFromEnv]
+    : [clientUrlFromEnv, 'http://localhost:3000', 'http://127.0.0.1:3000']
+)
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests with no origin (e.g., health checks)
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.has(origin)) return callback(null, true)
+      return callback(new Error('Not allowed by CORS'))
+    },
+    credentials: true,
+  })
+)
+
 app.use(morgan('combined'))
 app.use(compression())
 // Stripe webhooks require raw body; mount JSON for other routes below
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/api/billing/webhook')) {
+    // For webhook route, do not consume body here; route will read raw body
     return next()
   }
   express.json({ limit: '1mb' })(req, res, (err) => {

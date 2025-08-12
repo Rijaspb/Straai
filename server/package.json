@@ -19,7 +19,11 @@
     "db:seed": "tsx ../prisma/seed.ts",
     "db:reset": "prisma migrate reset --schema=../prisma/schema.prisma"
   },
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "dependencies": {
+    "@straai/shared": "workspace:*",
     "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.38.5",
     "axios": "^1.6.2",

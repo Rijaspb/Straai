@@ -54,7 +54,7 @@ export function Sidebar() {
     setSearchQuery,
   } = useChatStore()
 
-  const { user, signOut } = useAuthStore()
+  const { user } = useAuthStore()
 
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')

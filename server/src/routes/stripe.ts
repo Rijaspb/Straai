@@ -271,6 +271,7 @@ router.post('/cancel-now', authenticate, async (req: AuthenticatedRequest, res) 
 })
 
 // POST /api/billing/webhook - Stripe webhooks (raw body)
+// Raw body parsing and signature verification for Stripe webhook
 router.post('/webhook', async (req, res): Promise<void> => {
   try {
     const rawBody = await buffer(req)
@@ -278,6 +279,10 @@ router.post('/webhook', async (req, res): Promise<void> => {
     let event: Stripe.Event
 
     if (webhookSecret) {
+      if (!signature) {
+        res.status(400).json({ error: 'Missing Stripe-Signature header' })
+        return
+      }
       event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
     } else {
       event = JSON.parse(rawBody.toString())
