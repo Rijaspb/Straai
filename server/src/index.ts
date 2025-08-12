@@ -12,19 +12,6 @@ import { DailyQuickWinsScheduler } from './scheduler/DailyQuickWinsScheduler'
 import { startMemoryMonitoring, scheduleMemoryCleanup } from './lib/memoryMonitor'
 import { prisma } from './lib/prisma'
 
-// Run migrations on startup in production
-if (process.env.NODE_ENV === 'production' && process.env.AUTO_MIGRATE === 'true') {
-  import('child_process').then(({ exec }) => {
-    exec('npx prisma migrate deploy --schema=../prisma/schema.prisma', (error, stdout, stderr) => {
-      if (error) {
-        console.error('Migration failed:', error)
-        process.exit(1)
-      }
-      console.log('✅ Migrations applied:', stdout)
-    })
-  })
-}
-
 // Prevent duplicate schedulers in dev with hot-reload
 const globalForSchedulers = global as unknown as {
   __schedulersStarted?: boolean
