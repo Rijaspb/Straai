@@ -27,7 +27,7 @@
     "db:reset": "npm run db:reset --workspace=server",
     "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
     "setup": "node -e \"console.log('Please run: .\\\\scripts\\\\setup-env.ps1 (Windows) or ./scripts/setup-env.sh (Unix)')\"",
-    "prepare": "husky install"
+    "prepare": "husky install || true"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
